@@ -24,6 +24,7 @@ const links = [
   { href: "/vendors", label: "Vendors" },
   { href: "/expenses", label: "Expenses" },
   { href: "/settings", label: "Settings" },
+  { href: "/changelog", label: "Changelog" },
 ];
 
 export function NavBar({
