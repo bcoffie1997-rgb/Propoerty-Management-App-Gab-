@@ -7,7 +7,14 @@ import { getExpiringLeases } from "@/lib/actions/leases";
 import type { LeaseFull } from "@/lib/actions/leases";
 import type { RentStatusRow } from "@/lib/actions/rent";
 import type { ExpenseWithProperty } from "@/lib/actions/expenses";
-import { DEMO_MODE, demoGetDashboardData } from "@/lib/demo-data";
+import type { MaintenanceIssueWithRelations } from "@/lib/actions/issues";
+import type { Vendor } from "@/types/database";
+import {
+  DEMO_MODE,
+  demoGetDashboardData,
+  demoGetOverdueIssues,
+  demoGetExpiringVendors,
+} from "@/lib/demo-data";
 import { getSessionContext } from "@/lib/auth";
 
 async function requireUser() {
@@ -28,6 +35,8 @@ export type DashboardData = {
   rentStatus: RentStatusRow[];
   expiringLeases: LeaseFull[];
   recentExpenses: ExpenseWithProperty[];
+  overdueIssues: MaintenanceIssueWithRelations[];
+  expiringVendors: Vendor[];
 };
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -43,6 +52,9 @@ export async function getDashboardData(): Promise<DashboardData> {
     "yyyy-MM-dd",
   );
 
+  const today = format(new Date(), "yyyy-MM-dd");
+  const thirtyDays = format(addDays(new Date(), 30), "yyyy-MM-dd");
+
   const [
     { data: properties },
     { data: activeLeases },
@@ -51,6 +63,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     { data: monthRent },
     { data: monthExpenses },
     { data: recentExpensesData },
+    { data: overdueIssuesData },
+    { data: expiringVendorsData },
   ] = await Promise.all([
     supabase.from("properties").select("id"),
     supabase
@@ -74,6 +88,22 @@ export async function getDashboardData(): Promise<DashboardData> {
       .select("*, property:properties(id, nickname)")
       .order("expense_date", { ascending: false })
       .limit(5),
+    supabase
+      .from("maintenance_issues")
+      .select(
+        "*, property:properties(id, nickname), tenant:tenants(id, first_name, last_name), vendor:vendors(id, name, category)",
+      )
+      .lt("due_date", today)
+      .not("status", "in", "(completed,closed)")
+      .order("due_date", { ascending: true })
+      .limit(5),
+    supabase
+      .from("vendors")
+      .select("*")
+      .gte("insurance_expiration", today)
+      .lte("insurance_expiration", thirtyDays)
+      .eq("active", true)
+      .order("insurance_expiration", { ascending: true }),
   ]);
 
   const { data: units } = await supabase.from("units").select("id");
@@ -100,5 +130,8 @@ export async function getDashboardData(): Promise<DashboardData> {
     expiringLeases,
     recentExpenses:
       (recentExpensesData as unknown as ExpenseWithProperty[]) ?? [],
+    overdueIssues:
+      (overdueIssuesData as unknown as MaintenanceIssueWithRelations[]) ?? [],
+    expiringVendors: (expiringVendorsData as unknown as Vendor[]) ?? [],
   };
 }

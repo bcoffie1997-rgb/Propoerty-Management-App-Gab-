@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ShieldCheck, UserCircle } from "lucide-react";
+import { GlobalSearch } from "@/components/shared/global-search";
 
 import { cn } from "@/lib/utils";
 import {
@@ -70,6 +71,7 @@ export function NavBar({
           </nav>
         </div>
         <div className="flex items-center gap-2.5">
+          <GlobalSearch />
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>

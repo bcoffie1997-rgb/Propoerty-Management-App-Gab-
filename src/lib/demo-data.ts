@@ -1201,6 +1201,43 @@ export function demoGetExpenses(
     .sort((a, b) => b.expense_date.localeCompare(a.expense_date));
 }
 
+export function demoGetOverdueIssues(): MaintenanceIssueWithRelations[] {
+  const today = "2026-05-19";
+  return DEMO_ISSUES.filter(
+    (i) => i.due_date && i.due_date < today && i.status !== "completed" && i.status !== "closed",
+  )
+    .map((issue) => {
+      const property = propertyById.get(issue.property_id)!;
+      const tenant = issue.tenant_id ? tenantById.get(issue.tenant_id) ?? null : null;
+      const vendor = issue.vendor_id ? vendorById.get(issue.vendor_id) ?? null : null;
+      return {
+        ...issue,
+        property: { id: property.id, nickname: property.nickname },
+        tenant: tenant
+          ? { id: tenant.id, first_name: tenant.first_name, last_name: tenant.last_name }
+          : null,
+        vendor: vendor
+          ? { id: vendor.id, name: vendor.name, category: vendor.category }
+          : null,
+      };
+    })
+    .sort((a, b) => (a.due_date ?? "").localeCompare(b.due_date ?? ""));
+}
+
+export function demoGetExpiringVendors(): Vendor[] {
+  const today = "2026-05-19";
+  const thirtyDays = "2026-06-18";
+  return DEMO_VENDORS.filter(
+    (v) =>
+      v.active &&
+      v.insurance_expiration &&
+      v.insurance_expiration >= today &&
+      v.insurance_expiration <= thirtyDays,
+  ).sort((a, b) =>
+    (a.insurance_expiration ?? "").localeCompare(b.insurance_expiration ?? ""),
+  );
+}
+
 export function demoGetDashboardData(): DashboardData {
   const period = currentPeriodMonth();
   const rentStatus = demoGetCurrentMonthRentStatus();
@@ -1228,6 +1265,8 @@ export function demoGetDashboardData(): DashboardData {
     rentStatus,
     expiringLeases,
     recentExpenses,
+    overdueIssues: demoGetOverdueIssues(),
+    expiringVendors: demoGetExpiringVendors(),
   };
 }
 
@@ -1304,6 +1343,70 @@ export function demoExportFinancialsCSV(
 // =============================================================================
 // VENDORS & ISSUES
 // =============================================================================
+
+export function demoSearchAll(query: string): {
+  properties: { id: string; label: string; sublabel?: string; href: string; category: "Property" | "Tenant" | "Issue" | "Vendor" }[];
+  tenants: { id: string; label: string; sublabel?: string; href: string; category: "Property" | "Tenant" | "Issue" | "Vendor" }[];
+  issues: { id: string; label: string; sublabel?: string; href: string; category: "Property" | "Tenant" | "Issue" | "Vendor" }[];
+  vendors: { id: string; label: string; sublabel?: string; href: string; category: "Property" | "Tenant" | "Issue" | "Vendor" }[];
+} {
+  const q = query.trim().toLowerCase();
+  if (!q) return { properties: [], tenants: [], issues: [], vendors: [] };
+
+  const properties = DEMO_PROPERTIES.filter(
+    (p) =>
+      p.nickname.toLowerCase().includes(q) ||
+      p.address_line1.toLowerCase().includes(q) ||
+      p.city.toLowerCase().includes(q),
+  ).map((p) => ({
+    id: p.id,
+    label: p.nickname,
+    sublabel: `${p.address_line1}, ${p.city}`,
+    href: `/properties/${p.id}`,
+    category: "Property" as const,
+  }));
+
+  const tenants = DEMO_TENANTS.filter(
+    (t) =>
+      t.first_name.toLowerCase().includes(q) ||
+      t.last_name.toLowerCase().includes(q) ||
+      (t.email?.toLowerCase().includes(q) ?? false) ||
+      (t.phone?.toLowerCase().includes(q) ?? false),
+  ).map((t) => ({
+    id: t.id,
+    label: `${t.first_name} ${t.last_name}`,
+    sublabel: t.email ?? t.phone ?? undefined,
+    href: `/tenants/${t.id}`,
+    category: "Tenant" as const,
+  }));
+
+  const issues = DEMO_ISSUES.filter(
+    (i) =>
+      i.title.toLowerCase().includes(q) ||
+      (i.description?.toLowerCase().includes(q) ?? false),
+  ).map((i) => ({
+    id: i.id,
+    label: i.title,
+    sublabel: i.description ?? undefined,
+    href: `/issues`,
+    category: "Issue" as const,
+  }));
+
+  const vendors = DEMO_VENDORS.filter(
+    (v) =>
+      v.active &&
+      (v.name.toLowerCase().includes(q) ||
+        (v.contact_name?.toLowerCase().includes(q) ?? false)),
+  ).map((v) => ({
+    id: v.id,
+    label: v.name,
+    sublabel: v.contact_name ?? undefined,
+    href: `/vendors`,
+    category: "Vendor" as const,
+  }));
+
+  return { properties, tenants, issues, vendors };
+}
 
 export function demoGetVendors(): Vendor[] {
   return DEMO_VENDORS;

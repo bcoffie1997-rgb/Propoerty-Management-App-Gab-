@@ -1,7 +1,7 @@
 import { getDashboardData } from "@/lib/actions/dashboard";
 import { formatMoney } from "@/lib/format";
 import { StatCard } from "@/components/shared/stat-card";
-import { AlertBanner } from "@/components/dashboard/alert-banner";
+import { ActionCards } from "@/components/dashboard/action-cards";
 import { RentStatusTable } from "@/components/dashboard/rent-status-table";
 import { LeaseExpirationsCard } from "@/components/dashboard/lease-expirations-card";
 import { RecentExpensesCard } from "@/components/dashboard/recent-expenses-card";
@@ -9,8 +9,14 @@ import { RecentExpensesCard } from "@/components/dashboard/recent-expenses-card"
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const { summary, rentStatus, expiringLeases, recentExpenses } =
-    await getDashboardData();
+  const {
+    summary,
+    rentStatus,
+    expiringLeases,
+    recentExpenses,
+    overdueIssues,
+    expiringVendors,
+  } = await getDashboardData();
 
   return (
     <div className="space-y-6">
@@ -25,9 +31,11 @@ export default async function DashboardPage() {
         </p>
       </div>
 
-      <AlertBanner
+      <ActionCards
         rentStatus={rentStatus}
         expiringLeases={expiringLeases}
+        overdueIssues={overdueIssues}
+        expiringVendors={expiringVendors}
       />
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
