@@ -10,10 +10,12 @@
 import type {
   Expense,
   Lease,
+  MaintenanceIssue,
   Property,
   RentPayment,
   Tenant,
   Unit,
+  Vendor,
 } from "@/types/database";
 import type { LeaseFull } from "@/lib/actions/leases";
 import type { RentStatusRow } from "@/lib/actions/rent";
@@ -27,6 +29,7 @@ import type {
   PropertyFinancials,
 } from "@/lib/actions/financials";
 import { CATEGORY_LABELS } from "@/lib/schemas/expense";
+import type { MaintenanceIssueWithRelations } from "@/lib/actions/issues";
 
 export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === "1";
 export const SINGLE_USER_MODE = process.env.NEXT_PUBLIC_SINGLE_USER_MODE === "1";
@@ -40,6 +43,10 @@ export function assertNotDemo(action: string): void {
 }
 
 const OWNER = "demo-owner-id";
+
+// =============================================================================
+// PROPERTIES
+// =============================================================================
 
 export const DEMO_PROPERTIES: Property[] = [
   {
@@ -72,7 +79,7 @@ export const DEMO_PROPERTIES: Property[] = [
     purchase_date: "2020-09-01",
     purchase_price: 410000,
     current_value: 495000,
-    notes: null,
+    notes: "Duplex. Shared laundry in basement.",
     created_at: "2020-09-01T00:00:00Z",
     updated_at: "2024-01-15T00:00:00Z",
   },
@@ -93,7 +100,62 @@ export const DEMO_PROPERTIES: Property[] = [
     created_at: "2023-11-10T00:00:00Z",
     updated_at: "2024-03-22T00:00:00Z",
   },
+  {
+    id: "prop-maple",
+    owner_id: OWNER,
+    nickname: "321 Maple",
+    address_line1: "321 Maple Dr",
+    address_line2: null,
+    city: "Denver",
+    state: "CO",
+    zip: "80205",
+    property_type: "townhouse",
+    purchase_date: "2021-04-20",
+    purchase_price: 320000,
+    current_value: 350000,
+    notes: "New water heater installed 2025. Snow removal included in HOA.",
+    created_at: "2021-04-20T00:00:00Z",
+    updated_at: "2025-01-10T00:00:00Z",
+  },
+  {
+    id: "prop-cedar",
+    owner_id: OWNER,
+    nickname: "555 Cedar",
+    address_line1: "555 Cedar Ln",
+    address_line2: null,
+    city: "Nashville",
+    state: "TN",
+    zip: "37203",
+    property_type: "single_family",
+    purchase_date: "2023-02-14",
+    purchase_price: 280000,
+    current_value: 310000,
+    notes: "Great rental history. Fenced yard, pet-friendly.",
+    created_at: "2023-02-14T00:00:00Z",
+    updated_at: "2024-08-05T00:00:00Z",
+  },
+  {
+    id: "prop-birch",
+    owner_id: OWNER,
+    nickname: "888 Birch",
+    address_line1: "888 Birch Blvd",
+    address_line2: "Apt 4B",
+    city: "Portland",
+    state: "OR",
+    zip: "97201",
+    property_type: "multi_family",
+    purchase_date: "2019-08-01",
+    purchase_price: 520000,
+    current_value: 580000,
+    notes: "Four-plex. Recent exterior paint 2025. Coin laundry on-site.",
+    created_at: "2019-08-01T00:00:00Z",
+    updated_at: "2025-03-15T00:00:00Z",
+  },
 ];
+
+// =============================================================================
+// UNITS
+// =============================================================================
 
 export const DEMO_UNITS: Unit[] = [
   {
@@ -129,7 +191,44 @@ export const DEMO_UNITS: Unit[] = [
     notes: null,
     created_at: "2023-11-10T00:00:00Z",
   },
+  {
+    id: "unit-maple",
+    property_id: "prop-maple",
+    unit_label: "Main",
+    bedrooms: 3,
+    bathrooms: 2.5,
+    sqft: 1800,
+    market_rent: 2400,
+    notes: null,
+    created_at: "2021-04-20T00:00:00Z",
+  },
+  {
+    id: "unit-cedar",
+    property_id: "prop-cedar",
+    unit_label: "Main",
+    bedrooms: 3,
+    bathrooms: 2,
+    sqft: 1550,
+    market_rent: 1950,
+    notes: null,
+    created_at: "2023-02-14T00:00:00Z",
+  },
+  {
+    id: "unit-birch",
+    property_id: "prop-birch",
+    unit_label: "Apt 4B",
+    bedrooms: 1,
+    bathrooms: 1,
+    sqft: 750,
+    market_rent: 1400,
+    notes: null,
+    created_at: "2019-08-01T00:00:00Z",
+  },
 ];
+
+// =============================================================================
+// TENANTS
+// =============================================================================
 
 export const DEMO_TENANTS: Tenant[] = [
   {
@@ -165,7 +264,44 @@ export const DEMO_TENANTS: Tenant[] = [
     notes: "Works remote. Generally easy to reach midday.",
     created_at: "2025-12-18T00:00:00Z",
   },
+  {
+    id: "tenant-emily",
+    owner_id: OWNER,
+    first_name: "Emily",
+    last_name: "Rodriguez",
+    email: "emily.r@example.com",
+    phone: "720-555-0322",
+    emergency_contact: "Carlos Rodriguez — 720-555-0323",
+    notes: "Has a service dog. Prefers text over calls.",
+    created_at: "2024-11-01T00:00:00Z",
+  },
+  {
+    id: "tenant-david",
+    owner_id: OWNER,
+    first_name: "David",
+    last_name: "Thompson",
+    email: "dthompson@example.com",
+    phone: "615-555-0444",
+    emergency_contact: "Lisa Thompson — 615-555-0445",
+    notes: "Musician — practices drums in garage evenings.",
+    created_at: "2024-09-15T00:00:00Z",
+  },
+  {
+    id: "tenant-aisha",
+    owner_id: OWNER,
+    first_name: "Aisha",
+    last_name: "Johnson",
+    email: "aisha.j@example.com",
+    phone: "503-555-0555",
+    emergency_contact: "Maya Johnson — 503-555-0556",
+    notes: "Travel nurse. Often away 3-4 days per week.",
+    created_at: "2025-01-20T00:00:00Z",
+  },
 ];
+
+// =============================================================================
+// LEASES
+// =============================================================================
 
 export const DEMO_LEASES: Lease[] = [
   {
@@ -179,7 +315,7 @@ export const DEMO_LEASES: Lease[] = [
     deposit_held: true,
     rent_due_day: 1,
     status: "active",
-    notes: null,
+    notes: "Renewal conversation in July.",
     created_at: "2025-07-15T00:00:00Z",
     updated_at: "2025-08-01T00:00:00Z",
   },
@@ -213,7 +349,56 @@ export const DEMO_LEASES: Lease[] = [
     created_at: "2025-12-18T00:00:00Z",
     updated_at: "2026-01-01T00:00:00Z",
   },
+  {
+    id: "lease-emily",
+    unit_id: "unit-maple",
+    tenant_id: "tenant-emily",
+    start_date: "2024-12-01",
+    end_date: "2026-05-31",
+    monthly_rent: 2400,
+    deposit_amount: 2400,
+    deposit_held: true,
+    rent_due_day: 1,
+    status: "active",
+    notes: "Not renewing — moving out of state.",
+    created_at: "2024-11-01T00:00:00Z",
+    updated_at: "2024-12-01T00:00:00Z",
+  },
+  {
+    id: "lease-david",
+    unit_id: "unit-cedar",
+    tenant_id: "tenant-david",
+    start_date: "2024-10-01",
+    end_date: "2026-10-01",
+    monthly_rent: 1950,
+    deposit_amount: 1950,
+    deposit_held: true,
+    rent_due_day: 1,
+    status: "active",
+    notes: "Wants to renew. Will discuss rate increase.",
+    created_at: "2024-09-15T00:00:00Z",
+    updated_at: "2024-10-01T00:00:00Z",
+  },
+  {
+    id: "lease-aisha",
+    unit_id: "unit-birch",
+    tenant_id: "tenant-aisha",
+    start_date: "2025-02-01",
+    end_date: "2026-02-01",
+    monthly_rent: 1400,
+    deposit_amount: 1400,
+    deposit_held: true,
+    rent_due_day: 1,
+    status: "active",
+    notes: "Short-term lease. May extend month-to-month.",
+    created_at: "2025-01-20T00:00:00Z",
+    updated_at: "2025-02-01T00:00:00Z",
+  },
 ];
+
+// =============================================================================
+// RENT PAYMENTS
+// =============================================================================
 
 function rentRow(
   id: string,
@@ -257,7 +442,26 @@ export const DEMO_RENT_PAYMENTS: RentPayment[] = [
   rentRow("rp-jamie-mar", "lease-jamie", "2026-03-01", 2200, 2200, "2026-03-01", "paid", "ACH"),
   rentRow("rp-jamie-apr", "lease-jamie", "2026-04-01", 2200, 2200, "2026-04-01", "paid", "ACH"),
   rentRow("rp-jamie-may", "lease-jamie", "2026-05-01", 2200, 2200, "2026-05-01", "paid", "ACH"),
+  // Emily — current unpaid
+  rentRow("rp-emily-feb", "lease-emily", "2026-02-01", 2400, 2400, "2026-02-01", "paid", "Zelle"),
+  rentRow("rp-emily-mar", "lease-emily", "2026-03-01", 2400, 2400, "2026-03-01", "paid", "Zelle"),
+  rentRow("rp-emily-apr", "lease-emily", "2026-04-01", 2400, 2400, "2026-04-01", "paid", "Zelle"),
+  rentRow("rp-emily-may", "lease-emily", "2026-05-01", 2400, 0, null, "unpaid"),
+  // David — paid consistently
+  rentRow("rp-david-feb", "lease-david", "2026-02-01", 1950, 1950, "2026-02-01", "paid", "Cash App"),
+  rentRow("rp-david-mar", "lease-david", "2026-03-01", 1950, 1950, "2026-03-01", "paid", "Cash App"),
+  rentRow("rp-david-apr", "lease-david", "2026-04-01", 1950, 1950, "2026-04-01", "paid", "Cash App"),
+  rentRow("rp-david-may", "lease-david", "2026-05-01", 1950, 1950, "2026-05-01", "paid", "Cash App"),
+  // Aisha — late payment history
+  rentRow("rp-aisha-feb", "lease-aisha", "2026-02-01", 1400, 1400, "2026-02-05", "paid", "Venmo"),
+  rentRow("rp-aisha-mar", "lease-aisha", "2026-03-01", 1400, 1400, "2026-03-08", "paid", "Venmo"),
+  rentRow("rp-aisha-apr", "lease-aisha", "2026-04-01", 1400, 1400, "2026-04-10", "paid", "Venmo"),
+  rentRow("rp-aisha-may", "lease-aisha", "2026-05-01", 1400, 0, null, "late"),
 ];
+
+// =============================================================================
+// EXPENSES
+// =============================================================================
 
 export const DEMO_EXPENSES: Expense[] = [
   {
@@ -356,9 +560,523 @@ export const DEMO_EXPENSES: Expense[] = [
     recurring: true,
     created_at: "2026-04-01T00:00:00Z",
   },
+  {
+    id: "exp-9",
+    property_id: "prop-maple",
+    category: "management",
+    amount: 240,
+    expense_date: "2026-05-01",
+    vendor: "Denver PM Group",
+    description: "Monthly management fee (10%)",
+    receipt_url: null,
+    recurring: true,
+    created_at: "2026-05-01T00:00:00Z",
+  },
+  {
+    id: "exp-10",
+    property_id: "prop-cedar",
+    category: "insurance",
+    amount: 110,
+    expense_date: "2026-05-03",
+    vendor: "Allstate",
+    description: "Annual premium / 12",
+    receipt_url: null,
+    recurring: true,
+    created_at: "2026-05-03T00:00:00Z",
+  },
+  {
+    id: "exp-11",
+    property_id: "prop-birch",
+    category: "utility",
+    amount: 340,
+    expense_date: "2026-05-15",
+    vendor: "Portland Water & Power",
+    description: "Water, sewer, trash for common areas",
+    receipt_url: null,
+    recurring: true,
+    created_at: "2026-05-15T00:00:00Z",
+  },
+  {
+    id: "exp-12",
+    property_id: "prop-maple",
+    category: "repair",
+    amount: 175,
+    expense_date: "2026-05-08",
+    vendor: "Mile High Handyman",
+    description: "Fixed loose railing on front stairs.",
+    receipt_url: null,
+    recurring: false,
+    created_at: "2026-05-08T00:00:00Z",
+  },
+  {
+    id: "exp-13",
+    property_id: "prop-cedar",
+    category: "other",
+    amount: 85,
+    expense_date: "2026-05-06",
+    vendor: "Nashville Lawn Pros",
+    description: "Bi-weekly mowing and edging (landscaping)",
+    receipt_url: null,
+    recurring: true,
+    created_at: "2026-05-06T00:00:00Z",
+  },
+  {
+    id: "exp-14",
+    property_id: "prop-birch",
+    category: "repair",
+    amount: 425,
+    expense_date: "2026-04-28",
+    vendor: "Rose City Electric",
+    description: "Replaced faulty breaker panel in Unit 4B.",
+    receipt_url: null,
+    recurring: false,
+    created_at: "2026-04-28T00:00:00Z",
+  },
+  {
+    id: "exp-15",
+    property_id: "prop-oak",
+    category: "mortgage",
+    amount: 1680,
+    expense_date: "2026-05-01",
+    vendor: "Wells Fargo",
+    description: "Monthly P&I",
+    receipt_url: null,
+    recurring: true,
+    created_at: "2026-05-01T00:00:00Z",
+  },
+  {
+    id: "exp-16",
+    property_id: "prop-pine",
+    category: "management",
+    amount: 220,
+    expense_date: "2026-05-01",
+    vendor: "Austin Leasing Co",
+    description: "Monthly management fee",
+    receipt_url: null,
+    recurring: true,
+    created_at: "2026-05-01T00:00:00Z",
+  },
 ];
 
-// ----- Derived helpers -----
+// =============================================================================
+// VENDORS
+// =============================================================================
+
+export const DEMO_VENDORS: Vendor[] = [
+  {
+    id: "vendor-garcia",
+    owner_id: OWNER,
+    name: "Garcia Plumbing",
+    category: "plumbing",
+    contact_name: "Miguel Garcia",
+    email: "miguel@garciaplumbing.com",
+    phone: "317-555-1001",
+    insurance_expiration: "2026-12-31",
+    notes: "Fast response. Great for emergencies.",
+    image_url: null,
+    active: true,
+    created_at: "2023-01-15T00:00:00Z",
+    updated_at: "2024-06-01T00:00:00Z",
+  },
+  {
+    id: "vendor-bright",
+    owner_id: OWNER,
+    name: "Bright Spark Electric",
+    category: "electrical",
+    contact_name: "Lisa Nguyen",
+    email: "lisa@brightsparkelec.com",
+    phone: "773-555-2002",
+    insurance_expiration: "2027-03-15",
+    notes: "Licensed master electrician. Codes expert.",
+    image_url: null,
+    active: true,
+    created_at: "2022-08-10T00:00:00Z",
+    updated_at: "2025-01-20T00:00:00Z",
+  },
+  {
+    id: "vendor-cool",
+    owner_id: OWNER,
+    name: "Cool Air HVAC",
+    category: "hvac",
+    contact_name: "James Patterson",
+    email: "service@coolairhvac.com",
+    phone: "512-555-3003",
+    insurance_expiration: "2026-08-20",
+    notes: "Annual maintenance plan available.",
+    image_url: null,
+    active: true,
+    created_at: "2023-03-22T00:00:00Z",
+    updated_at: "2024-09-10T00:00:00Z",
+  },
+  {
+    id: "vendor-ace",
+    owner_id: OWNER,
+    name: "Ace Handyman Services",
+    category: "handyman",
+    contact_name: "Robert 'Ace' Miller",
+    email: "ace@handymanservices.net",
+    phone: "720-555-4004",
+    insurance_expiration: "2026-11-30",
+    notes: "Jack of all trades. Fair pricing.",
+    image_url: null,
+    active: true,
+    created_at: "2024-01-05T00:00:00Z",
+    updated_at: "2024-11-15T00:00:00Z",
+  },
+  {
+    id: "vendor-green",
+    owner_id: OWNER,
+    name: "Green Lawn Care",
+    category: "landscaping",
+    contact_name: "Tamara Brooks",
+    email: "tamara@greenlawncare.com",
+    phone: "615-555-5005",
+    insurance_expiration: "2027-01-10",
+    notes: "Seasonal contracts. Snow removal too.",
+    image_url: null,
+    active: true,
+    created_at: "2023-05-18T00:00:00Z",
+    updated_at: "2024-04-20T00:00:00Z",
+  },
+  {
+    id: "vendor-pristine",
+    owner_id: OWNER,
+    name: "Pristine Cleaners",
+    category: "cleaning",
+    contact_name: "Sofia Martinez",
+    email: "bookings@pristinecleaners.com",
+    phone: "503-555-6006",
+    insurance_expiration: "2026-09-25",
+    notes: "Turnover specialists. Deep clean included.",
+    image_url: null,
+    active: true,
+    created_at: "2022-11-30T00:00:00Z",
+    updated_at: "2025-02-10T00:00:00Z",
+  },
+  {
+    id: "vendor-bug",
+    owner_id: OWNER,
+    name: "Bug Busters",
+    category: "pest_control",
+    contact_name: "Derek Wilson",
+    email: "derek@bugbusterspc.com",
+    phone: "317-555-7007",
+    insurance_expiration: "2026-07-14",
+    notes: "Quarterly spray schedule. Pet-safe products.",
+    image_url: null,
+    active: true,
+    created_at: "2024-02-14T00:00:00Z",
+    updated_at: "2024-08-01T00:00:00Z",
+  },
+  {
+    id: "vendor-rapid",
+    owner_id: OWNER,
+    name: "Rapid Appliance Repair",
+    category: "appliance",
+    contact_name: "Karen Olsen",
+    email: "karen@rapidappliance.com",
+    phone: "512-555-8008",
+    insurance_expiration: "2027-05-01",
+    notes: "Warranty work accepted. OEM parts only.",
+    image_url: null,
+    active: true,
+    created_at: "2023-07-08T00:00:00Z",
+    updated_at: "2025-01-05T00:00:00Z",
+  },
+  {
+    id: "vendor-summit",
+    owner_id: OWNER,
+    name: "Summit General Contracting",
+    category: "general_contractor",
+    contact_name: "Chris Henderson",
+    email: "chris@summitgc.com",
+    phone: "720-555-9009",
+    insurance_expiration: "2026-10-30",
+    notes: "Full reno crew. Permits handled.",
+    image_url: null,
+    active: true,
+    created_at: "2021-06-20T00:00:00Z",
+    updated_at: "2024-12-01T00:00:00Z",
+  },
+  {
+    id: "vendor-last",
+    owner_id: OWNER,
+    name: "Last Resort Repairs",
+    category: "other",
+    contact_name: "Unknown",
+    email: null,
+    phone: "555-0000",
+    insurance_expiration: null,
+    notes: "Avoid if possible. Expensive and slow.",
+    image_url: null,
+    active: false,
+    created_at: "2020-01-01T00:00:00Z",
+    updated_at: "2023-06-15T00:00:00Z",
+  },
+];
+
+// =============================================================================
+// ISSUES
+// =============================================================================
+
+export const DEMO_ISSUES: MaintenanceIssue[] = [
+  {
+    id: "issue-1",
+    property_id: "prop-oak",
+    tenant_id: "tenant-marcus",
+    vendor_id: "vendor-garcia",
+    title: "Kitchen sink leak",
+    description: "Water pooling under cabinet. Tenant noticed drip from trap.",
+    category: "plumbing",
+    priority: "high",
+    status: "completed",
+    reported_date: "2026-05-08",
+    due_date: "2026-05-12",
+    completed_date: "2026-05-10",
+    estimated_cost: 350,
+    actual_cost: 380,
+    invoice_ref: "GP-2026-0542",
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-08T10:00:00Z",
+    updated_at: "2026-05-10T14:00:00Z",
+  },
+  {
+    id: "issue-2",
+    property_id: "prop-main",
+    tenant_id: "tenant-sarah",
+    vendor_id: null,
+    title: "HVAC not cooling upstairs",
+    description: "Bedroom stays 5+ degrees warmer than thermostat setting.",
+    category: "hvac",
+    priority: "urgent",
+    status: "assigned",
+    reported_date: "2026-05-18",
+    due_date: "2026-05-20",
+    completed_date: null,
+    estimated_cost: 400,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-18T08:30:00Z",
+    updated_at: "2026-05-18T09:00:00Z",
+  },
+  {
+    id: "issue-3",
+    property_id: "prop-pine",
+    tenant_id: null,
+    vendor_id: "vendor-rapid",
+    title: "Dishwasher not draining",
+    description: "Standing water at bottom after cycle. Makes grinding noise.",
+    category: "appliance",
+    priority: "medium",
+    status: "in_progress",
+    reported_date: "2026-05-15",
+    due_date: "2026-05-22",
+    completed_date: null,
+    estimated_cost: 200,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-15T16:00:00Z",
+    updated_at: "2026-05-17T11:00:00Z",
+  },
+  {
+    id: "issue-4",
+    property_id: "prop-birch",
+    tenant_id: "tenant-aisha",
+    vendor_id: null,
+    title: "Broken outlet in bathroom",
+    description: "GFCI outlet tripped and will not reset. No power to vanity lights.",
+    category: "electrical",
+    priority: "high",
+    status: "new",
+    reported_date: "2026-05-19",
+    due_date: "2026-05-21",
+    completed_date: null,
+    estimated_cost: 150,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-19T07:15:00Z",
+    updated_at: "2026-05-19T07:15:00Z",
+  },
+  {
+    id: "issue-5",
+    property_id: "prop-cedar",
+    tenant_id: "tenant-david",
+    vendor_id: "vendor-bug",
+    title: "Ants in kitchen",
+    description: "Tenant reports sugar ants along baseboards near pantry.",
+    category: "pest",
+    priority: "medium",
+    status: "assigned",
+    reported_date: "2026-05-14",
+    due_date: "2026-05-24",
+    completed_date: null,
+    estimated_cost: 120,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-14T13:00:00Z",
+    updated_at: "2026-05-16T10:00:00Z",
+  },
+  {
+    id: "issue-6",
+    property_id: "prop-maple",
+    tenant_id: "tenant-emily",
+    vendor_id: "vendor-ace",
+    title: "Front stair railing loose",
+    description: "Top post wobbles. Safety concern for winter ice.",
+    category: "repair",
+    priority: "low",
+    status: "completed",
+    reported_date: "2026-05-05",
+    due_date: "2026-05-10",
+    completed_date: "2026-05-08",
+    estimated_cost: 150,
+    actual_cost: 175,
+    invoice_ref: "ACE-2026-112",
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-05T09:00:00Z",
+    updated_at: "2026-05-08T15:00:00Z",
+  },
+  {
+    id: "issue-7",
+    property_id: "prop-main",
+    tenant_id: null,
+    vendor_id: null,
+    title: "Annual HVAC inspection",
+    description: "Preventative maintenance per service agreement.",
+    category: "inspection",
+    priority: "low",
+    status: "on_hold",
+    reported_date: "2026-05-01",
+    due_date: "2026-06-01",
+    completed_date: null,
+    estimated_cost: 180,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-01T00:00:00Z",
+    updated_at: "2026-05-10T00:00:00Z",
+  },
+  {
+    id: "issue-8",
+    property_id: "prop-oak",
+    tenant_id: null,
+    vendor_id: null,
+    title: "Pre-move-out inspection",
+    description: "Marcus lease ends 6/15. Schedule walkthrough 1 week prior.",
+    category: "turnover",
+    priority: "medium",
+    status: "new",
+    reported_date: "2026-05-19",
+    due_date: "2026-06-08",
+    completed_date: null,
+    estimated_cost: 0,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-19T10:00:00Z",
+    updated_at: "2026-05-19T10:00:00Z",
+  },
+  {
+    id: "issue-9",
+    property_id: "prop-birch",
+    tenant_id: null,
+    vendor_id: "vendor-summit",
+    title: "Water damage ceiling repair",
+    description: "Leak from upstairs unit caused stain and soft drywall in hallway.",
+    category: "repair",
+    priority: "high",
+    status: "in_progress",
+    reported_date: "2026-04-25",
+    due_date: "2026-05-25",
+    completed_date: null,
+    estimated_cost: 1200,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-04-25T11:00:00Z",
+    updated_at: "2026-05-05T14:00:00Z",
+  },
+  {
+    id: "issue-10",
+    property_id: "prop-pine",
+    tenant_id: "tenant-jamie",
+    vendor_id: null,
+    title: "Garbage disposal jammed",
+    description: "Tenant put citrus peels down disposal. Now humming but not spinning.",
+    category: "plumbing",
+    priority: "low",
+    status: "closed",
+    reported_date: "2026-04-10",
+    due_date: "2026-04-15",
+    completed_date: "2026-04-12",
+    estimated_cost: 100,
+    actual_cost: 85,
+    invoice_ref: "GP-2026-0389",
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-04-10T14:00:00Z",
+    updated_at: "2026-04-12T16:00:00Z",
+  },
+  {
+    id: "issue-11",
+    property_id: "prop-cedar",
+    tenant_id: null,
+    vendor_id: null,
+    title: "Smoke detector chirping",
+    description: "Hallway unit beeps every 30 seconds. Likely low battery.",
+    category: "repair",
+    priority: "medium",
+    status: "new",
+    reported_date: "2026-05-19",
+    due_date: "2026-05-22",
+    completed_date: null,
+    estimated_cost: 25,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-19T11:30:00Z",
+    updated_at: "2026-05-19T11:30:00Z",
+  },
+  {
+    id: "issue-12",
+    property_id: "prop-maple",
+    tenant_id: null,
+    vendor_id: "vendor-bright",
+    title: "Flickering overhead lights",
+    description: "Living room recessed lights flicker when dimmer above 70%.",
+    category: "electrical",
+    priority: "low",
+    status: "on_hold",
+    reported_date: "2026-05-12",
+    due_date: "2026-05-26",
+    completed_date: null,
+    estimated_cost: 250,
+    actual_cost: null,
+    invoice_ref: null,
+    image_url: null,
+    created_by: OWNER,
+    created_at: "2026-05-12T18:00:00Z",
+    updated_at: "2026-05-15T09:00:00Z",
+  },
+];
+
+// =============================================================================
+// DERIVED HELPERS
+// =============================================================================
 
 const propertyById = new Map(DEMO_PROPERTIES.map((p) => [p.id, p]));
 const unitsByProperty = new Map<string, Unit[]>();
@@ -369,6 +1087,7 @@ DEMO_UNITS.forEach((u) => {
 });
 const unitById = new Map(DEMO_UNITS.map((u) => [u.id, u]));
 const tenantById = new Map(DEMO_TENANTS.map((t) => [t.id, t]));
+const vendorById = new Map(DEMO_VENDORS.map((v) => [v.id, v]));
 
 function leaseToFull(l: Lease): LeaseFull {
   const unit = unitById.get(l.unit_id)!;
@@ -580,4 +1299,32 @@ export function demoExportFinancialsCSV(
     ),
   ];
   return lines.join("\n");
+}
+
+// =============================================================================
+// VENDORS & ISSUES
+// =============================================================================
+
+export function demoGetVendors(): Vendor[] {
+  return DEMO_VENDORS;
+}
+
+export function demoGetIssues(): MaintenanceIssueWithRelations[] {
+  return DEMO_ISSUES.map((issue) => {
+    const property = propertyById.get(issue.property_id)!;
+    const tenant = issue.tenant_id ? tenantById.get(issue.tenant_id) ?? null : null;
+    const vendor = issue.vendor_id
+      ? vendorById.get(issue.vendor_id) ?? null
+      : null;
+    return {
+      ...issue,
+      property: { id: property.id, nickname: property.nickname },
+      tenant: tenant
+        ? { id: tenant.id, first_name: tenant.first_name, last_name: tenant.last_name }
+        : null,
+      vendor: vendor
+        ? { id: vendor.id, name: vendor.name, category: vendor.category }
+        : null,
+    };
+  }).sort((a, b) => b.created_at.localeCompare(a.created_at));
 }

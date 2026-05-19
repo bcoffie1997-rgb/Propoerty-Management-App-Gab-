@@ -11,7 +11,7 @@ import type {
   Tenant,
   Vendor,
 } from "@/types/database";
-import { DEMO_MODE, assertNotDemo } from "@/lib/demo-data";
+import { DEMO_MODE, assertNotDemo, demoGetIssues } from "@/lib/demo-data";
 
 async function requireUser() {
   return getSessionContext();
@@ -24,7 +24,7 @@ export type MaintenanceIssueWithRelations = MaintenanceIssue & {
 };
 
 export async function getIssues(): Promise<MaintenanceIssueWithRelations[]> {
-  if (DEMO_MODE) return [];
+  if (DEMO_MODE) return demoGetIssues();
   const { supabase } = await requireUser();
   const { data, error } = await supabase
     .from("maintenance_issues")

@@ -5,14 +5,14 @@ import { revalidatePath } from "next/cache";
 import { getSessionContext } from "@/lib/auth";
 import { vendorSchema, type VendorInput } from "@/lib/schemas/vendor";
 import type { Vendor } from "@/types/database";
-import { DEMO_MODE, assertNotDemo } from "@/lib/demo-data";
+import { DEMO_MODE, assertNotDemo, demoGetVendors } from "@/lib/demo-data";
 
 async function requireUser() {
   return getSessionContext();
 }
 
 export async function getVendors(): Promise<Vendor[]> {
-  if (DEMO_MODE) return [];
+  if (DEMO_MODE) return demoGetVendors();
   const { supabase } = await requireUser();
   const { data, error } = await supabase
     .from("vendors")
