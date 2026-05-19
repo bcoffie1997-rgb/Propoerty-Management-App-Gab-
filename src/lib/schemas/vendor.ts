@@ -47,6 +47,10 @@ export const vendorSchema = z.object({
   phone: optionalString,
   insurance_expiration: optionalString,
   notes: optionalString,
+  image_url: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() !== "" ? v : null)),
   active: z.boolean().default(true),
 });
 

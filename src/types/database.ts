@@ -156,6 +156,7 @@ export interface Vendor {
   phone: string | null;
   insurance_expiration: string | null;
   notes: string | null;
+  image_url: string | null;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -177,6 +178,7 @@ export interface MaintenanceIssue {
   estimated_cost: number | null;
   actual_cost: number | null;
   invoice_ref: string | null;
+  image_url: string | null;
   created_by: string | null;
   created_at: string;
   updated_at: string;

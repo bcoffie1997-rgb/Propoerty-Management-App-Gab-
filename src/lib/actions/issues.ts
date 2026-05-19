@@ -62,6 +62,17 @@ export async function updateIssue(id: string, input: IssueInput) {
   assertNotDemo("Updating an issue");
   const { supabase } = await requireUser();
   const parsed = issueSchema.parse(input);
+
+  const { data: existing } = await supabase
+    .from("maintenance_issues")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+
+  if (existing?.image_url && existing.image_url !== parsed.image_url) {
+    await supabase.storage.from("receipts").remove([existing.image_url]);
+  }
+
   const payload = {
     ...parsed,
     completed_date:
@@ -81,6 +92,16 @@ export async function updateIssue(id: string, input: IssueInput) {
 export async function deleteIssue(id: string) {
   assertNotDemo("Deleting an issue");
   const { supabase } = await requireUser();
+  const { data: existing } = await supabase
+    .from("maintenance_issues")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+
+  if (existing?.image_url) {
+    await supabase.storage.from("receipts").remove([existing.image_url]);
+  }
+
   const { error } = await supabase.from("maintenance_issues").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/issues");

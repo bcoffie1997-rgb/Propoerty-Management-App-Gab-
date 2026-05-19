@@ -42,6 +42,17 @@ export async function updateVendor(id: string, input: VendorInput) {
   assertNotDemo("Editing a vendor");
   const { supabase } = await requireUser();
   const parsed = vendorSchema.parse(input);
+
+  const { data: existing } = await supabase
+    .from("vendors")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+
+  if (existing?.image_url && existing.image_url !== parsed.image_url) {
+    await supabase.storage.from("receipts").remove([existing.image_url]);
+  }
+
   const { error } = await supabase.from("vendors").update(parsed).eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/vendors");
@@ -51,6 +62,16 @@ export async function updateVendor(id: string, input: VendorInput) {
 export async function deleteVendor(id: string) {
   assertNotDemo("Deleting a vendor");
   const { supabase } = await requireUser();
+  const { data: existing } = await supabase
+    .from("vendors")
+    .select("image_url")
+    .eq("id", id)
+    .single();
+
+  if (existing?.image_url) {
+    await supabase.storage.from("receipts").remove([existing.image_url]);
+  }
+
   const { error } = await supabase.from("vendors").delete().eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath("/vendors");

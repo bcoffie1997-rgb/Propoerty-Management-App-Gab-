@@ -35,6 +35,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ImageLink } from "@/components/shared/image-link";
 import { IssueFormDialog } from "@/components/issues/issue-form-dialog";
 
 function toOption<T extends { id: string }>(
@@ -194,6 +195,9 @@ export function IssuesList({
                   </TableCell>
                   <TableCell>
                     <div className="flex justify-end gap-1">
+                      {issue.image_url && (
+                        <ImageLink path={issue.image_url} />
+                      )}
                       <Button
                         variant="ghost"
                         size="icon"

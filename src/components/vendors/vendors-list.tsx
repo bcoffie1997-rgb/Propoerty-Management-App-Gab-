@@ -21,6 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { ImageLink } from "@/components/shared/image-link";
 import { VendorFormDialog } from "@/components/vendors/vendor-form-dialog";
 
 export function VendorsList({ vendors }: { vendors: Vendor[] }) {
@@ -125,6 +126,9 @@ export function VendorsList({ vendors }: { vendors: Vendor[] }) {
                     </TableCell>
                     <TableCell>
                       <div className="flex justify-end gap-1">
+                        {vendor.image_url && (
+                          <ImageLink path={vendor.image_url} />
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"

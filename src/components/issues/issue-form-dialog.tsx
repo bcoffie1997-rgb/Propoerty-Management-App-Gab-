@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Plus } from "lucide-react";
+import { Plus, Upload, X } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 
@@ -18,6 +18,7 @@ import {
   type IssueInput,
 } from "@/lib/schemas/issue";
 import { createIssue, updateIssue } from "@/lib/actions/issues";
+import { uploadImage } from "@/lib/storage";
 import type { MaintenanceIssue, Vendor } from "@/types/database";
 import { Button } from "@/components/ui/button";
 import {
@@ -59,6 +60,8 @@ const issueStatusLabels: Record<(typeof issueStatusEnum.options)[number], string
 
 type FormOption = { id: string; label: string };
 
+const SINGLE_USER_MODE = process.env.NEXT_PUBLIC_SINGLE_USER_MODE === "1";
+
 function defaultsFor(issue?: MaintenanceIssue): IssueInput {
   return {
     property_id: issue?.property_id ?? "",
@@ -75,6 +78,7 @@ function defaultsFor(issue?: MaintenanceIssue): IssueInput {
     estimated_cost: issue?.estimated_cost ?? undefined,
     actual_cost: issue?.actual_cost ?? undefined,
     invoice_ref: issue?.invoice_ref ?? "",
+    image_url: issue?.image_url ?? "",
   };
 }
 
@@ -104,6 +108,7 @@ export function IssueFormDialog({
     onOpenChange ? onOpenChange(next) : setInternalOpen(next);
   };
   const editing = !!issue;
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<IssueInput>({
     resolver: zodResolver(issueSchema),
@@ -450,11 +455,79 @@ export function IssueFormDialog({
                 )}
               />
 
+              <FormField
+                control={form.control}
+                name="image_url"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Photo (optional)</FormLabel>
+                    {field.value ? (
+                      <div className="flex items-center justify-between rounded-md border bg-muted/40 px-3 py-2 text-xs">
+                        <span className="truncate font-mono">
+                          {field.value.split("/").slice(-1)[0]}
+                        </span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="h-6 w-6"
+                          onClick={() => field.onChange("")}
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <FormControl>
+                        <label className="flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md border border-dashed text-sm text-muted-foreground hover:bg-muted/40">
+                          <Upload className="h-4 w-4" />
+                          {SINGLE_USER_MODE
+                            ? "Upload unavailable in single-user mode"
+                            : uploading
+                              ? "Uploading…"
+                              : "Take photo or upload image"}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            capture="environment"
+                            className="hidden"
+                            disabled={SINGLE_USER_MODE}
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              setUploading(true);
+                              try {
+                                const path = await uploadImage(
+                                  file,
+                                  "receipts",
+                                  "issues/",
+                                );
+                                field.onChange(path);
+                              } catch (err) {
+                                toast.error(
+                                  err instanceof Error
+                                    ? err.message
+                                    : "Upload failed",
+                                );
+                              } finally {
+                                setUploading(false);
+                              }
+                            }}
+                          />
+                        </label>
+                      </FormControl>
+                    )}
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <DialogFooter className="gap-2">
                 <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
                   Cancel
                 </Button>
-                <Button type="submit" disabled={form.formState.isSubmitting}>
+                <Button
+                  type="submit"
+                  disabled={form.formState.isSubmitting || uploading}
+                >
                   {editing ? "Save changes" : "Create issue"}
                 </Button>
               </DialogFooter>

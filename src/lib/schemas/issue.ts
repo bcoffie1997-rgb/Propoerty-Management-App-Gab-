@@ -82,6 +82,10 @@ export const issueSchema = z.object({
   estimated_cost: optionalNumber,
   actual_cost: optionalNumber,
   invoice_ref: optionalString,
+  image_url: z
+    .string()
+    .optional()
+    .transform((v) => (v && v.trim() !== "" ? v : null)),
 });
 
 export type IssueInput = z.input<typeof issueSchema>;
