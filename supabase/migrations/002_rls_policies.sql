@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration 002 — Row Level Security Policies
--- Holdings — Property Manager MVP
+-- Santi Fortune — Property Manager MVP
 --
 -- Every table has owner_id (directly or transitively). All policies scope
 -- access by auth.uid(). Verified by Phase 5 security checklist.

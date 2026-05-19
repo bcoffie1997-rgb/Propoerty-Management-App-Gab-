@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration 003 — Rent Generation & Status Functions
--- Holdings — Property Manager MVP
+-- Santi Fortune — Property Manager MVP
 --
 -- generate_rent_periods: called by createLease + renewLease server actions
 -- recalc_rent_statuses:  called by getCurrentMonthRentStatus + getDashboardData

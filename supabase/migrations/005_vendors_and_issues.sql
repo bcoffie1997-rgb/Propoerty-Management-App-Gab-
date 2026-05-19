@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration 005 — Vendors + Maintenance Issues
--- Holdings — Property Manager MVP+
+-- Santi Fortune — Property Manager MVP+
 -- =============================================================================
 
 -- Vendors

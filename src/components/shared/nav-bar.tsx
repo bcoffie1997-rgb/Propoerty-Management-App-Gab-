@@ -44,7 +44,7 @@ export function NavBar({
             href="/"
             className="font-mono text-base font-semibold tracking-tight text-foreground/95"
           >
-            Holdings
+            Santi Fortune
           </Link>
           <nav className="hidden items-center gap-1 rounded-full border bg-card/70 p-1 md:flex">
             {links.map((link) => {

@@ -1,4 +1,4 @@
-# Holdings
+# Santi Fortune
 
 Internal property manager for a small long-term residential portfolio.
 Built on Next.js 14 + Supabase + Vercel. Designed to be run by one person.

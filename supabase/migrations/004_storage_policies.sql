@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration 004 — Storage Policies for `receipts` bucket
--- Holdings — Property Manager MVP
+-- Santi Fortune — Property Manager MVP
 --
 -- PREREQUISITE: In the Supabase dashboard, create a Storage bucket named
 -- 'receipts' with public access DISABLED. Then run this migration.

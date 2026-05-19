@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Changelog — Holdings",
+  title: "Changelog — Santi Fortune",
 };
 
 export default function ChangelogPage() {
@@ -114,7 +114,7 @@ export default function ChangelogPage() {
                   <span className="font-medium text-foreground">
                     Initial MVP release
                   </span>{" "}
-                  — Holdings property manager.
+                  — Santi Fortune property manager.
                 </li>
                 <li>
                   <span className="font-medium text-foreground">

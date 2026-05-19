@@ -1,4 +1,4 @@
-# Holdings — Property Manager MVP Build Spec
+# Santi Fortune — Property Manager MVP Build Spec
 
 Solo landlord, 1–10 LTR units. Built on Next.js + Supabase + Vercel.
 Handoff format: ready for Claude Code execution.
@@ -529,7 +529,7 @@ Tasks:
 4. Polish src/app/login/page.tsx: centered shadcn Card, "Sign in with
    Google" button. The scaffold has a minimal version that works.
 5. Build src/app/(app)/layout.tsx (move from src/app/layout.tsx structure):
-   - Top nav: app wordmark "Holdings", links to Dashboard, Properties,
+   - Top nav: app wordmark "Santi Fortune", links to Dashboard, Properties,
      Tenants, Expenses, Settings
    - Avatar dropdown right (signed-in email, sign out)
    - Floating action button bottom-right (mobile only) — placeholder
@@ -790,7 +790,7 @@ Tasks:
 4. Error handling: toast on every server action failure with the actual
    error message (single user; verbose is good).
 5. Dark mode QA: every page, every modal, every state.
-6. Add a basic favicon and meta tags (title: "Holdings", description).
+6. Add a basic favicon and meta tags (title: "Santi Fortune", description).
 7. Install PostHog (src/app/layout.tsx provider) — capture page views
    + custom events: rent_marked_paid, expense_created, lease_created,
    property_created. No PII beyond user id.

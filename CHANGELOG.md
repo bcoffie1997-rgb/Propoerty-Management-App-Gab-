@@ -33,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial MVP release — Holdings property manager.
+- Initial MVP release — Santi Fortune property manager.
 - Property management: add, edit, and track properties with addresses, purchase info, and notes.
 - Tenant management: store tenant contact info and emergency contacts.
 - Lease management: create leases linked to units and tenants, track rent amounts, deposits, and status.

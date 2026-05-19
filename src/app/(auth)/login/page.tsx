@@ -39,7 +39,7 @@ export default function LoginPage() {
     <main className="flex min-h-screen items-center justify-center px-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle className="font-mono text-2xl">Holdings</CardTitle>
+          <CardTitle className="font-mono text-2xl">Santi Fortune</CardTitle>
           <CardDescription>
             Internal property manager. Sign in to continue.
           </CardDescription>

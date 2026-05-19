@@ -1,6 +1,6 @@
 -- =============================================================================
 -- Migration 001 — Initial Schema
--- Holdings — Property Manager MVP
+-- Santi Fortune — Property Manager MVP
 -- =============================================================================
 
 -- Enable extensions

@@ -13,7 +13,7 @@ const mono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Holdings",
+  title: "Santi Fortune",
   description: "Internal property manager for a small portfolio.",
   robots: { index: false, follow: false },
 };
